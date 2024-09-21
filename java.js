@@ -3,17 +3,15 @@ window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogn
 
 const recognition = new SpeechRecognition();
 recognition.interimResults = false;
-recognition.lang = 'en-US';  // Set language to English
 
 const resultDisplay = document.getElementById('result');
 const voiceInputDisplay = document.getElementById('voiceInput');
 const micButton = document.getElementById('micButton');
+const historyDisplay = document.getElementById('history');
+const languageSelect = document.getElementById('languageSelect');
 
-// Calculator state
 let currentInput = '';
-let operator = '';
-let firstOperand = '';
-let secondOperand = '';
+let history = [];
 
 // Update the result display
 function updateDisplay(value) {
@@ -23,17 +21,30 @@ function updateDisplay(value) {
 // Clear calculator
 function clearCalculator() {
     currentInput = '';
-    operator = '';
-    firstOperand = '';
-    secondOperand = '';
     updateDisplay(0);
 }
 
+// Clear history
+function clearHistory() {
+    history = [];
+    historyDisplay.innerHTML = '';
+}
+
 // Speak the result using SpeechSynthesis
-function speakResult(text) {
+function speakResult(text, language) {
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';  // Set language to English
+    utterance.lang = language;
     window.speechSynthesis.speak(utterance);
+}
+
+// Log history
+function logHistory(input, result) {
+    const timestamp = new Date().toLocaleString();
+    history.push({ input, result, timestamp });
+    const entry = document.createElement('div');
+    entry.classList.add('history-entry');
+    entry.textContent = `${timestamp}: ${input} = ${result}`;
+    historyDisplay.appendChild(entry);
 }
 
 // Handle calculator button clicks
@@ -42,16 +53,42 @@ document.querySelectorAll('.calc-btn').forEach(button => {
         const value = e.target.textContent;
         if (value === 'C') {
             clearCalculator();
+        } else if (value === '←') {
+            currentInput = currentInput.slice(0, -1);
+            updateDisplay(currentInput || 0);
         } else if (value === '=') {
-            // Evaluate the expression
             try {
                 const result = eval(currentInput);
                 updateDisplay(result);
-                speakResult(result);  // Speak the result after calculation
-                currentInput = result;
+                speakResult(result, languageSelect.value);
+                logHistory(currentInput, result);
+                currentInput = result.toString();
             } catch (error) {
                 updateDisplay('Error');
-                speakResult('Error');  // Speak error
+                speakResult('Error', languageSelect.value);
+            }
+        } else if (value === '%') {
+            try {
+                currentInput = (eval(currentInput) / 100).toString();
+                updateDisplay(currentInput);
+                speakResult(currentInput, languageSelect.value);
+            } catch (error) {
+                updateDisplay('Error');
+                speakResult('Error', languageSelect.value);
+            }
+        } else if (value === '^') {
+            currentInput += '**'; // Use ** for exponentiation in JavaScript
+            updateDisplay(currentInput);
+        } else if (value === '√') {
+            try {
+                const result = Math.sqrt(eval(currentInput));
+                updateDisplay(result);
+                speakResult(result, languageSelect.value);
+                logHistory(`√${currentInput}`, result);
+                currentInput = result.toString();
+            } catch (error) {
+                updateDisplay('Error');
+                speakResult('Error', languageSelect.value);
             }
         } else {
             currentInput += value;
@@ -60,12 +97,16 @@ document.querySelectorAll('.calc-btn').forEach(button => {
     });
 });
 
+// Clear history button
+document.getElementById('clearHistory-btn').addEventListener('click', clearHistory);
+
 // Event listener for the mic button to start recognition
 micButton.addEventListener('click', () => {
+    recognition.lang = languageSelect.value;
     recognition.start();
     resultDisplay.textContent = "Listening...";
     voiceInputDisplay.textContent = "Listening for input...";
-    micButton.disabled = true;  // Disable button while listening
+    micButton.disabled = true;
 });
 
 // Process voice input for calculation
@@ -73,30 +114,26 @@ recognition.addEventListener('result', event => {
     const voiceInput = event.results[0][0].transcript.toLowerCase();
     voiceInputDisplay.textContent = `You said: "${voiceInput}"`;
 
-    // Clean up the voice input to prepare for calculation
-    const processedInput = voiceInput.replace(/plus/g, "+")
-                                     .replace(/minus/g, "-")
-                                     .replace(/times/g, "*")
-                                     .replace(/multiplied by/g, "*")
-                                      .replace(/Multiplication by/g, "×")
-                                     .replace(/multiplication/g, "*")
-                                     .replace(/into/g, "*")
-                                     .replace(/divided by/g, "/")
-                                     .replace(/x/g, "*");  // Added this line to handle "x"
+    const processedInput = voiceInput
+        .replace(/plus/g, "+")
+        .replace(/minus/g, "-")
+        .replace(/times/g, "*")
+        .replace(/multiplied by/g, "*")
+        .replace(/multiplication/g, "*")
+        .replace(/into/g, "*")
+        .replace(/divided by/g, "/")
+        .replace(/x/g, "*")
+        .replace(/sqrt/g, "√")
+        .replace(/power/g, "^"); // Handle voice commands for sqrt and exponentiation
 
-    // Attempt to evaluate the expression
     try {
         const result = eval(processedInput);
-        if (isNaN(result) || result === undefined) {
-            updateDisplay('Invalid calculation');
-            speakResult('Invalid calculation');  // Speak invalid calculation
-        } else {
-            updateDisplay(result);
-            speakResult(result);  // Speak the result
-        }
+        updateDisplay(result);
+        speakResult(result, languageSelect.value);
+        logHistory(voiceInput, result);
     } catch (error) {
         updateDisplay('Error: Invalid calculation');
-        speakResult('Error: Invalid calculation');  // Speak error message
+        speakResult('Error: Invalid calculation', languageSelect.value);
     }
 
     micButton.disabled = false;
@@ -106,5 +143,5 @@ recognition.addEventListener('result', event => {
 recognition.addEventListener('error', event => {
     resultDisplay.textContent = `Error occurred: ${event.error}`;
     micButton.disabled = false;
-    speakResult(`Error occurred: ${event.error}`);  // Speak error
+    speakResult(`Error occurred: ${event.error}`, languageSelect.value);
 });
