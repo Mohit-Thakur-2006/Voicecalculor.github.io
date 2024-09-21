@@ -77,10 +77,11 @@ recognition.addEventListener('result', event => {
     const processedInput = voiceInput.replace(/plus/g, "+")
                                      .replace(/minus/g, "-")
                                      .replace(/times/g, "*")
-                                     .replace(/multiplied by/g, "x")
+                                     .replace(/multiplied by/g, "*")
+                                      .replace(/Multiplication by/g, "×")
                                      .replace(/multiplication/g, "*")
                                      .replace(/into/g, "*")
-                                     .replace(/divided by/g, "÷")
+                                     .replace(/divided by/g, "/")
                                      .replace(/x/g, "*");  // Added this line to handle "x"
 
     // Attempt to evaluate the expression
