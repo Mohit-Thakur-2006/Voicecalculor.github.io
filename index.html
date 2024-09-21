@@ -3,84 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Calculator</title>
+    <title>Multilingual Voice Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .calculator {
-            width: 400px;
-            padding: 20px;
-            border-radius: 15px;
-            background-color: #fff;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-        #result {
-            font-size: 2rem;
-            padding: 20px;
-            text-align: right;
-            background-color: #eaeaea;
-            border-radius: 10px;
-            min-height: 70px;
-            margin-bottom: 15px;
-            border: 2px solid #d4d4d4;
-        }
-        #voiceInput {
-            font-size: 1rem;
-            color: #777;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .button-row {
-            display: flex;
-            justify-content: space-between;
-        }
-        .calc-btn {
-            width: 23%;
-            padding: 20px;
-            font-size: 1.5rem;
-            margin: 5px 0;
-            background-color: #f9f9f9;
-            border: none;
-            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .calc-btn:hover {
-            background-color: #eaeaea;
-        }
-        .calc-btn:active {
-            background-color: #dcdcdc;
-        }
-        .mic-btn {
-            width: 100%;
-            padding: 15px;
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: background-color 0.3s;
-            margin-top: 10px;
-        }
-        .mic-btn:hover {
-            background-color: #45a049;
-        }
-        .mic-btn:active {
-            background-color: #388e3c;
-        }
-    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia&effect=fire">
+    <link rel="stylesheet" href="color.css">
 </head>
 <body>
+   
+    <h2 class="font-effect-fire">Multilingual Voice Calculator</h2>
+
+    <!-- Language Selection -->
+    <div class="language-select">
+        <label for="languageSelect">Choose Language:</label>
+        <select id="languageSelect">
+            <option value="en-US" selected>English</option>
+            <option value="es-ES">Spanish</option>
+            <option value="fr-FR">French</option>
+            <option value="de-DE">German</option>
+            <option value="hi-IN">Hindi</option>
+        </select>
+    </div>
 
     <div class="calculator">
         <div id="result">0</div>
@@ -88,32 +30,44 @@
         
         <!-- Calculator Buttons -->
         <div class="button-row">
-            <button class="calc-btn">7</button>
-            <button class="calc-btn">8</button>
-            <button class="calc-btn">9</button>
-            <button class="calc-btn">/</button>
+            <button class="calc-btn num-btn" style="background-color: #ff9999;">7</button>
+            <button class="calc-btn num-btn" style="background-color: #ffcc99;">8</button>
+            <button class="calc-btn num-btn" style="background-color: #ffff99;">9</button>
+            <button class="calc-btn op-btn">/</button>
         </div>
         <div class="button-row">
-            <button class="calc-btn">4</button>
-            <button class="calc-btn">5</button>
-            <button class="calc-btn">6</button>
-            <button class="calc-btn">*</button>
+            <button class="calc-btn num-btn" style="background-color: #99ff99;">4</button>
+            <button class="calc-btn num-btn" style="background-color: #99ccff;">5</button>
+            <button class="calc-btn num-btn" style="background-color: #cc99ff;">6</button>
+            <button class="calc-btn op-btn">*</button>
         </div>
         <div class="button-row">
-            <button class="calc-btn">1</button>
-            <button class="calc-btn">2</button>
-            <button class="calc-btn">3</button>
-            <button class="calc-btn">-</button>
+            <button class="calc-btn num-btn" style="background-color: #ffccff;">1</button>
+            <button class="calc-btn num-btn" style="background-color: #cceeff;">2</button>
+            <button class="calc-btn num-btn" style="background-color: #e6e6e6;">3</button>
+            <button class="calc-btn op-btn">-</button>
         </div>
         <div class="button-row">
-            <button class="calc-btn">0</button>
-            <button class="calc-btn">C</button>
-            <button class="calc-btn">=</button>
-            <button class="calc-btn">+</button>
+            <button class="calc-btn num-btn" style="background-color: #ffe6e6;">0</button>
+            <button class="calc-btn" id="delete-btn">←</button>
+            <button class="calc-btn" id="clear-btn">C</button>
+            <button class="calc-btn op-btn">+</button>
         </div>
-
-        <button class="mic-btn" id="micButton">🎤 Speak Now</button>
+        <div class="button-row">
+            <button class="calc-btn" id="percent-btn">%</button>
+            <button class="calc-btn" id="exp-btn">^</button>
+            <button class="calc-btn" id="sqrt-btn">√</button>
+            <button class="calc-btn" id="equals-btn">=</button>
+        </div>
+        <div class="button-row">
+            <button class="mic-btn" id="micButton">🎤 Speak Now</button>
+        </div>
     </div>
+
+    <!-- Calculation History -->
+    <h3>Calculation History</h3>
+    <div id="history"></div>
+    <button id="clearHistory-btn" style="background-color: Red;">Clear History</button>
 
     <script src="java.js"></script>
 </body>
